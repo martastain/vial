@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import time
-
 from vial import Vial
 
 class App(Vial):
@@ -12,13 +11,14 @@ class App(Vial):
                 f.write(request.body.raw)
 
             return self.response.json({
-                "message" : "I saved your payload to /tmp/",
+                "message" : "Payload saved to /tmp/",
                 "size" : request.length
             })
 
+        time.sleep(.1)
         return self.response.text(f"Requested {request.path}. IDK... i give up", status=404)
 
 app = App()
 
 if __name__ == "__main__":
-    app.serve("", 8090)
+    app.serve("", 8000)

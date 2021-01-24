@@ -10,7 +10,7 @@ def response_type(func):
     def wrapper(parent, body=None, status=200, custom_headers={}):
         body, headers = func(parent, body, status)
 
-        headers["Server"] = "Vial 0.1"
+        headers["Server"] = "Vial"
         headers["Content-Length"] = len(body)
         headers.update(custom_headers)
 
@@ -28,15 +28,22 @@ class VResponse():
         if body is None:
             r = "Status" if status < 400 else "Error"
             body = f"{r} {status}: {HTTPStatus(status).description}"
-        else:
-            body = body.encode("utf-8")
-
+        body = body.encode("utf-8")
         headers = {"Content-Type" : "text/txt"}
-        return body, headers 
-
+        return body, headers
 
     @response_type
     def json(self, body, status):
         body = json.dumps(body).encode("utf-8")
         headers = {"Content-Type" : "application/json"}
         return body, headers
+
+    @response_type
+    def raw(self, body, status):
+        headers = {"Content-Type" : "application/octet-stream"}
+        if type(body) == bytes:
+            return body, headers
+        elif type.body == str:
+            return body.encode("utf-8"), headers
+        else:
+            return str(body).encode("utf-8"), headers

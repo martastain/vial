@@ -1,4 +1,5 @@
 import json
+import urllib.parse
 
 class VRequestBody():
     def __init__(self, request):
@@ -48,6 +49,12 @@ class VRequest():
         return self.environ["QUERY_STRING"]
 
     @property
+    def query(self):
+        if not hasattr(self, "_query"):
+            self._query = urllib.parse.parse_qs(self.query_string)
+        return self._query
+
+    @property
     def length(self):
         try:
             return int(self.environ.get('CONTENT_LENGTH', 0))
@@ -57,7 +64,7 @@ class VRequest():
     @property
     def host(self):
         return self.environ["HTTP_HOST"]
-    
+
     @property
     def connection(self):
         return self.environ.get("HTTP_CONNECTION")
@@ -69,7 +76,7 @@ class VRequest():
     @property
     def user_agent(self):
         return self.environ.get("HTTP_USER_AGENT")
-        
+
     @property
     def accept(self):
         return self.environ["HTTP_ACCEPT"]
