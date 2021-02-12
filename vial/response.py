@@ -7,15 +7,15 @@ def format_status(code):
 
 
 def response_type(func):
-    def wrapper(parent, body=None, status=200, custom_headers={}):
-        body, headers = func(parent, body, status)
+    def wrapper(parent, body=None, status=200, headers={}):
+        body, rheaders = func(parent, body, status)
 
-        headers["Server"] = "Vial"
-        headers["Content-Length"] = len(body)
-        headers.update(custom_headers)
+        rheaders["Server"] = "Vial"
+        rheaders["Content-Length"] = len(body)
+        rheaders.update(headers)
 
         full_headers = []
-        for key, value in headers.items():
+        for key, value in rheaders.items():
             full_headers.append((key, str(value)))
 
         return format_status(status), full_headers, body

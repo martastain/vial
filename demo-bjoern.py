@@ -2,6 +2,6 @@
 
 import bjoern
 
-from demo import app
+from demo import app, LISTEN_ADDRESS, LISTEN_PORT
 
-bjoern.run(app, "127.0.0.1", 8000, reuse_port=True)
+bjoern.run(app, LISTEN_ADDRESS, LISTEN_PORT, reuse_port=True)
