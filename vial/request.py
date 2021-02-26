@@ -33,6 +33,9 @@ class VRequest():
         self.environ = environ
         self.body = VRequestBody(self)
 
+    def __repr__(self):
+        return f"<{self.method} Request '{self.path}'>"
+
     def __getitem__(self, key):
         return self.environ[key]
 
