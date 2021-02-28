@@ -18,7 +18,21 @@ class App(Vial):
                 "size" : request.length
             })
 
-        return self.response.text(f"Requested {request.path}. IDK... i give up", status=404)
+        # UTF-8 text/plain
+        if request.path == "/text":
+            return self.response.text("Lorem ipsum dolor sit amet")
+
+        # No content example (for preflight OPTIONS requests)
+        if request.path == "/204":
+            return self.response.text(status=204, headers={
+                "Access-Control-Allow-Origin" : "*",
+                "Access-Control-Allow-Headers" : "*",
+                "Access-Control-Allow-Methods" : "POST, OPTIONS",
+                "Access-Control-Max-Age" : "1728000",
+            })
+
+        return self.response(200, "Hello World")
+
 
 app = App()
 

@@ -9,6 +9,7 @@ import wsgiref.simple_server
 
 from .request import VRequest
 from .response import VResponse
+from .loginmanager import VialLoginManager
 
 
 try:
@@ -34,8 +35,16 @@ class VialRequestHandler(wsgiref.simple_server.WSGIRequestHandler):
 
 
 class Vial():
-    def __init__(self, app_name="Vial", logger=None):
-        self.response = VResponse()
+    def __init__(self, app_name="Vial", logger=None, **kwargs):
+        # Server settings
+        self.settings = {
+            "simple_response_always_200" : True
+        }
+        self.settings.update(kwargs)
+
+        # Default headers
+        self.headers = {"Server" : app_name}
+        self.response = VResponse(self)
         self.app_name = app_name
         self._logger = logger
 
@@ -52,23 +61,37 @@ class Vial():
     def __call__(self, environ, respond):
         request = VRequest(environ)
         try:
-            status, headers, body = self.handle(request)
+            r = self.handle(request)
+            if type(r) == tuple and len(r) == 3:
+                status, headers, body = r
+            elif r is None:
+                status, headers, body = self.response(501)
+            else:
+                self.logger.error(f"Vial.handle returned incorrect type {type(r)} for {request}")
+                status, headers, body = self.response(500)
         except Exception:
             if has_nxtools:
                 nxtools.log_traceback()
             else:
                 self.logger.error(f"Unhandled exception")
                 self.logger.debug(format_traceback())
-            status, headers, body = self.response.text("Internal server error", 500)
+            status, headers, body = self.response(500)
 
-        respond(status, headers)
+        respond(
+            status,
+            [(key, str(value)) for key, value in headers.items() if value]
+        )
+        if request.method == "HEAD":
+            yield b""
+            return
+
         if inspect.isgeneratorfunction(body):
             yield from body
         else:
             yield body
 
     def handle(self, request:VRequest):
-        return self.response.text("Vial.handle is not implemented", 501)
+        return self.response(501)
 
     def serve(self, host:str="", port:int=8080, log_requests:bool=True):
         """Start a development server"""
@@ -92,3 +115,4 @@ class Vial():
             os.kill(os.getpid(), signal.CTRL_BREAK_EVENT)
         else:
             os.kill(os.getpid(), signal.SIGTERM)
+
