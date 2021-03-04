@@ -48,6 +48,10 @@ class VRequest():
         return self.environ["PATH_INFO"]
 
     @property
+    def pathlist(self):
+        return [r for r in self.path.split(self.path) if r]
+
+    @property
     def query_string(self):
         return self.environ["QUERY_STRING"]
 
