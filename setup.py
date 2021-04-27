@@ -6,7 +6,7 @@ def read(fname):
 
 setup(
     name = "vial-http",
-    version = "0.2.3",
+    version = "0.3.0",
     author = "Martin Wacker",
     author_email = "martas@imm.cz",
     description = "WSGI based HTTP nano-framework",
@@ -14,7 +14,8 @@ setup(
     keywords = "http server minimal wsgi api",
     url = "https://github.com/martastain/vial",
     packages=['vial'],
-    long_description=read('README.rst'),
+    long_description=read('README.md'),
+    long_description_content_type='text/markdown',
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Environment :: Console",

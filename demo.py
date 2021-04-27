@@ -22,6 +22,12 @@ class App(Vial):
         if request.path == "/text":
             return self.response.text("Lorem ipsum dolor sit amet")
 
+        # match path /api/article/1234
+        if route := request.route("api", "article", "$id:int")
+            # and return a simple json response:
+            # {"response" : 200, "message" : "Returned article", "id" : 1234}
+            return self.response(200, "Returned article", id=route["id"])
+
         # No content example (for preflight OPTIONS requests)
         if request.path == "/204":
             return self.response.text(status=204, headers={

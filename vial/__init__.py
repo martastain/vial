@@ -5,12 +5,13 @@ import sys
 import signal
 import inspect
 import traceback
+import mimetypes
 import wsgiref.simple_server
 
 from .request import VRequest
 from .response import VResponse
 from .loginmanager import VialLoginManager
-
+from .route import VRoute
 
 try:
     import nxtools
@@ -38,7 +39,10 @@ class Vial():
     def __init__(self, app_name="Vial", logger=None, **kwargs):
         # Server settings
         self.settings = {
-            "simple_response_always_200" : True
+            "simple_response_always_200" : True,
+            "static_root" : None,
+            "static_index" : "index.html",
+            "static_404_to_index" : False
         }
         self.settings.update(kwargs)
 
@@ -62,10 +66,14 @@ class Vial():
         request = VRequest(environ)
         try:
             r = self.handle(request)
+
             if type(r) == tuple and len(r) == 3:
                 status, headers, body = r
             elif r is None:
-                status, headers, body = self.response(501)
+                if self.settings["static_root"]:
+                    status, headers, body = self.handle_static(request)
+                else:
+                    status, headers, body = self.response(501)
             else:
                 self.logger.error(f"Vial.handle returned incorrect type {type(r)} for {request}")
                 status, headers, body = self.response(500)
@@ -90,8 +98,36 @@ class Vial():
         else:
             yield body
 
+
+    def handle_static(self, request:VRequest):
+        root = self.settings["static_root"]
+        rpath = request.path.lstrip("/")
+        if not rpath:
+            rpath = self.settings["static_index"]
+        path = os.path.join(root, rpath)
+
+        if not os.path.isfile(path):
+            index = os.path.join(root, self.settings["static_index"])
+            if self.settings["static_404_to_index"] and os.path.isfile(index):
+                path = index
+            else:
+                return self.response(404, f"{request.path} cannot be found")
+
+        headers = { "Access-Control-Allow-Methods" : "GET" }
+        ct, enc = mimetypes.guess_type(path, strict=True)
+        if ct:
+            headers["Content-Type"] = ct
+        if enc:
+            headers["Content-Encoding"] = enc
+
+        #TODO: use generator
+        f = open(path, "rb")
+        return self.response.raw(f.read(), headers=headers)
+
+
     def handle(self, request:VRequest):
         return self.response(501)
+
 
     def serve(self, host:str="", port:int=8080, log_requests:bool=True):
         """Start a development server"""

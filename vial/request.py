@@ -1,6 +1,8 @@
 import json
 import urllib.parse
 
+from .route import VRoute
+
 class VRequestBody():
     def __init__(self, request):
         self.request = request
@@ -49,7 +51,7 @@ class VRequest():
 
     @property
     def pathlist(self):
-        return [r for r in self.path.split(self.path) if r]
+        return [r for r in self.path.split("/") if r]
 
     @property
     def query_string(self):
@@ -95,3 +97,6 @@ class VRequest():
     @property
     def accept_language(self):
         return self.environ.get("HTTP_ACCEPT_LANGUAGE")
+
+    def route(self, *args):
+        return VRoute(self, *args)

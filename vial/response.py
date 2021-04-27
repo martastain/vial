@@ -56,7 +56,7 @@ class VResponse():
         headers = {"Content-Type" : "application/octet-stream"}
         if type(body) == bytes:
             return body, headers
-        elif type.body == str:
+        elif type(body) == str:
             return body.encode("utf-8"), headers
         else:
             return str(body).encode("utf-8"), headers
