@@ -99,9 +99,12 @@ class Vial():
             yield body
 
 
-    def handle_static(self, request:VRequest):
-        root = self.settings["static_root"]
-        rpath = request.path.lstrip("/")
+    def handle_static(self, request, root=None):
+        root = root or self.settings["static_root"]
+        if isinstance(request, VRequest):
+            rpath = request.path.lstrip("/")
+        else:
+            rpath = str(request).lstrip("/")
         if not rpath:
             rpath = self.settings["static_index"]
         path = os.path.join(root, rpath)
@@ -111,7 +114,7 @@ class Vial():
             if self.settings["static_404_to_index"] and os.path.isfile(index):
                 path = index
             else:
-                return self.response(404, f"{request.path} cannot be found")
+                return self.response(404, f"{rpath} cannot be found")
 
         headers = { "Access-Control-Allow-Methods" : "GET" }
         ct, enc = mimetypes.guess_type(path, strict=True)
