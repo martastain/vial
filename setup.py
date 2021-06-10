@@ -6,7 +6,7 @@ def read(fname):
 
 setup(
     name = "vial-http",
-    version = "0.3.0",
+    version = "0.3.1",
     author = "Martin Wacker",
     author_email = "martas@imm.cz",
     description = "WSGI based HTTP nano-framework",

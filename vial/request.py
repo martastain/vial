@@ -2,17 +2,26 @@ import json
 import urllib.parse
 
 from .route import VRoute
+from .utils import CaseInsensitiveDict
+
 
 class VRequestBody():
     def __init__(self, request):
         self.request = request
+
+    def read(self, *args, **kwargs):
+        return self.file.read(*args, **kwargs)
+
+    @property
+    def file(self):
+        return self.request["wsgi.input"]
 
     @property
     def raw(self):
         length = self.request.length
         if not length:
             return b""
-        return self.request["wsgi.input"].read(length)
+        return self.file.read(length)
 
     @property
     def json(self):
@@ -21,13 +30,12 @@ class VRequestBody():
             return {}
         try:
             return json.loads(body)
-        except:
+        except json.JSONDecodeError:
             return {}
 
     @property
     def text(self):
         return self.raw.decode("utf-8")
-
 
 
 class VRequest():
@@ -40,6 +48,18 @@ class VRequest():
 
     def __getitem__(self, key):
         return self.environ[key]
+
+    @property
+    def headers(self):
+        if not hasattr(self, "_headers"):
+            self._headers = CaseInsensitiveDict()
+            for key, value in self.environ.items():
+                key = key.lower()
+                if not key.startswith("http_"):
+                    continue
+                key = key.replace("http_", "", 1).replace("_", "-")
+                self._headers[key] = value
+        return self._headers
 
     @property
     def method(self):

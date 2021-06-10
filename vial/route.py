@@ -15,14 +15,17 @@ class VRoute():
                 kl = exp.lstrip("$").split(":")
                 if len(kl) == 2:
                     func = {
-                        "int" : int,
-                        "str" : str,
-                        "float" : float,
-                        "bool" : bool
+                        "int": int,
+                        "str": str,
+                        "float": float,
+                        "bool": bool
                     }.get(kl[1], str)
                 else:
                     func = str
-                self.data[kl[0]] = func(elm)
+                try:
+                    self.data[kl[0]] = func(elm)
+                except ValueError:
+                    break
                 continue
 
             if exp != elm:
@@ -36,4 +39,3 @@ class VRoute():
 
     def __getitem__(self, key):
         return self.data.get(key, None)
-
