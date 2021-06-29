@@ -78,7 +78,8 @@ class Vial():
 
             for rfunc, rpath, rkwargs in self.routes:
                 args = [r for r in rpath.split("/") if r]
-                if route := request.route(*args):
+                route = request.route(*args)
+                if route:
                     r = rfunc(request, **route.data)
                     break
             else:
