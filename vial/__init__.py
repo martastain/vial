@@ -31,7 +31,7 @@ class VialRequestHandler(wsgiref.simple_server.WSGIRequestHandler):
     def log_message(self, format, *args):
         if not self.server.log_requests:
             return
-        req, resp, _ = args
+        req, resp, *_ = args
         self.server.parent.logger.debug(
             f"[{resp}] {req} from {self.client_address[0]}"
         )
